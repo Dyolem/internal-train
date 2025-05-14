@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人主页</title>
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        /* 重置样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-left: 30px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #3498db;
+        }
+
+        .hero {
+            padding: 100px 0;
+            text-align: center;
+            background-color: #fff;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: #7f8c8d;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .cards-section {
+            padding: 80px 0;
+            background-color: #f9f9f9;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+            font-size: 36px;
+            color: #2c3e50;
+        }
+
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: calc(25% - 15px);
+            margin-bottom: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-icon {
+            font-size: 40px;
+            margin-bottom: 20px;
+            color: #3498db;
+        }
+
+        .card h3 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .card p {
+            color: #7f8c8d;
+        }
+
+        .skills-section {
+            padding: 80px 0;
+            background-color: #fff;
+        }
+
+        .skills-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .skill-category {
+            width: 48%;
+            margin-bottom: 40px;
+        }
+
+        .skill-category h3 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .skill-bar {
+            height: 10px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .skill-progress {
+            height: 100%;
+            border-radius: 5px;
+            background-color: #3498db;
+        }
+
+        .skill-name {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .experience-section {
+            padding: 80px 0;
+            background-color: #f9f9f9;
+        }
+
+        .timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            background-color: #3498db;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -1px;
+        }
+
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            width: 50%;
+            box-sizing: border-box;
+        }
+
+        .timeline-item:nth-child(odd) {
+            left: 0;
+        }
+
+        .timeline-item:nth-child(even) {
+            left: 50%;
+        }
+
+        .timeline-content {
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .timeline-content h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .timeline-content .date {
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+
+        .contact-section {
+            padding: 80px 0;
+            background-color: #2c3e50;
+            color: #fff;
+            text-align: center;
+        }
+
+        .contact-section .section-title {
+            color: #fff;
+        }
+
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .contact-item {
+            margin: 0 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .contact-icon {
+            font-size: 30px;
+            margin-bottom: 15px;
+        }
+
+        footer {
+            background-color: #1a252f;
+            color: #fff;
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1024px) {
+            .card {
+                width: calc(33.33% - 15px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .card {
+                width: calc(50% - 10px);
+            }
+
+            .skill-category {
+                width: 100%;
+            }
+
+            .timeline::after {
+                left: 31px;
+            }
+
+            .timeline-item {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+
+            .timeline-item:nth-child(even) {
+                left: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                width: 100%;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <nav>
+            <div class="logo">我的个人主页</div>
+            <ul class="nav-links">
+                <li><a href="#home">首页</a></li>
+                <li><a href="#about">关于我</a></li>
+                <li><a href="#skills">技能</a></li>
+                <li><a href="#experience">经历</a></li>
+                <li><a href="#contact">联系我</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<section id="home" class="hero">
+    <div class="container">
+        <h1>你好，我是小茗</h1>
+        <p>前端开发工程师 /  绘画爱好者</p>
+    </div>
+</section>
+
+
+<section id="about" class="cards-section">
+    <div class="container">
+        <h2 class="section-title">关于我</h2>
+        <div class="cards-container">
+            <div class="card">
+                <div class="card-icon">💻</div>
+                <h3>编程</h3>
+                <p>热爱编程，专注于前端开发，擅长HTML、CSS和JavaScript。</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🎨</div>
+                <h3>设计</h3>
+                <p>对UI/UX设计充满热情，注重用户体验和视觉美感。</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">📷</div>
+                <h3>绘画</h3>
+                <p>业余绘画爱好者，喜欢阅读外国美术史。</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🌍</div>
+                <h3>旅行</h3>
+                <p>热爱旅行，探索不同的文化和风景，拓展视野。</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="skills" class="skills-section">
+    <div class="container">
+        <h2 class="section-title">我的技能</h2>
+        <div class="skills-container">
+            <div class="skill-category">
+                <h3>技术技能</h3>
+
+                <div class="skill-name">
+                    <span>HTML/CSS</span>
+                    <span>90%</span>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-progress" style="width: 90%;"></div>
+                </div>
+
+                <div class="skill-name">
+                    <span>JavaScript</span>
+                    <span>85%</span>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-progress" style="width: 85%;"></div>
+                </div>
+
+                <div class="skill-name">
+                    <span>React</span>
+                    <span>80%</span>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-progress" style="width: 80%;"></div>
+                </div>
+
+                <div class="skill-name">
+                    <span>Node.js</span>
+                    <span>75%</span>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-progress" style="width: 75%;"></div>
+                </div>
+            </div>
+
+            <div class="skill-category">
+                <h3>设计技能</h3>
+
+                <div class="skill-name">
+                    <span>UI设计</span>
+                    <span>85%</span>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-progress" style="width: 85%;"></div>
+                </div>
+
+                <div class="skill-name">
+                    <span>Photoshop</span>
+                    <span>80%</span>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-progress" style="width: 80%;"></div>
+                </div>
+
+                <div class="skill-name">
+                    <span>Figma</span>
+                    <span>90%</span>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-progress" style="width: 90%;"></div>
+                </div>
+
+                <div class="skill-name">
+                    <span>Illustrator</span>
+                    <span>70%</span>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-progress" style="width: 70%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="experience" class="experience-section">
+    <div class="container">
+        <h2 class="section-title">我的经历</h2>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="date">2024 - 2024</div>
+                    <h3>研发工程师</h3>
+                    <p>XXX科技有限公司</p>
+                    <p>负责公司核心产品的前端开发和维护，优化用户体验，提升网站性能。</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="date">2024 - 2025</div>
+                    <h3>前端开发工程师</h3>XYZ互联网公司
+                    <p></p>
+                    <p>参与多个Web项目的开发，负责页面布局和交互功能实现。</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="date">2021 - 2025</div>
+                    <h3>软件工程</h3>
+                    <p>Sichuan Normal University</p>
+                    <p>主修计算机科学与技术，辅修UI设计。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="contact" class="contact-section">
+    <div class="container">
+        <h2 class="section-title">联系我</h2>
+        <div class="contact-info">
+            <div class="contact-item">
+                <div class="contact-icon">📧</div>
+                <p>dyolem9@gmail.com</p>
+            </div>
+            <div class="contact-item">
+                <div class="contact-icon">📱</div>
+                <p>+86 123 4567 8910</p>
+            </div>
+            <div class="contact-item">
+                <div class="contact-icon">📍</div>
+                <p>成都市</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2025 我的个人主页. 保留所有权利.</p>
+    </div>
+</footer>
+
+<script>
+    // let currentSection = ''
+    // const sections = document.querySelectorAll('section');
+    // const navLinks = document.querySelectorAll('.nav-links a');
+    // const observers = new IntersectionObserver((entries)=>{
+    //     navLinks.forEach(link => {
+    //         link.style.color = '';
+    //     });
+    //    const queue =  entries.filter((entry)=>{
+    //        return  entry.isIntersecting
+    //     })
+    //     console.log(queue)
+    //     currentSection=  queue?.[0]?.target.getAttribute('id')
+    //     if(!currentSection) return
+    //     const a = document.querySelector(`.nav-links a[href="#${currentSection}"]`);
+    //     a.style.color = '#3498db'
+    //
+    //
+    //     console.log(entries)
+    // },{
+    //     threshold:[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,]
+    // })
+    // sections.forEach((section)=>{
+    //     observers.observe(section)
+    // })
+
+    // 滚动时高亮当前菜单
+    window.addEventListener('scroll', function() {
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('.nav-links a');
+
+        let currentSection = '';
+
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.clientHeight;
+
+            if (scrollY  >= (sectionTop - sectionHeight / 2)) {
+                currentSection = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.style.color = '';
+            if (link.getAttribute('href') === `#${currentSection}`) {
+                link.style.color = '#3498db';
+            }
+        });
+    });
+</script>
+</body>
+</html>
