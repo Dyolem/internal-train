@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .wall-container {
+      position: relative;
+      overflow: hidden;
+      margin: auto;
+      background-color: antiquewhite;
+    }
+
+    .operation-container {
+      margin: 20px auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .base {
+      position: absolute;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wall-container"></div>
+  <div class="operation-container">
+    <input type="text" placeholder="输入弹幕">
+    <div class="button-group">
+      <button class="launch">发射</button>
+      <button class="clear">清屏</button>
+    </div>
+
+  </div>
+
+  <script>
+    // 方案一
+    const WALL_WIDTH = 500
+    const WALL_HEIGHT = 200
+    const launchButton = document.querySelector('.launch')
+    const clearButton = document.querySelector('.clear')
+    const wall = document.querySelector('.wall-container')
+    wall.style.width = `${WALL_WIDTH}px`
+    wall.style.height = `${WALL_HEIGHT}px`
+    const input = document.querySelector('input')
+    class DanMu {
+      initPos
+      color
+      speed
+      size
+      value
+      #controller = new AbortController()
+      constructor(content = 'default') {
+        this.target = document.createElement('div')
+        this.target.textContent = content
+        this.color = this.#getRandomHexColor()
+        this.size = this.#getRandomFontSize()
+        this.speed = this.#getRandomSpeed()
+        this.initPos = this.#getRandomInitPos()
+        this.value = content
+        this.target.classList.add('base')
+        const [x, y] = this.initPos
+        this.target.style.left = `${x}px`
+        this.target.style.top = `${y}px`
+        this.target.style.color = this.color
+        this.target.style.fontSize = `${this.size}px`
+      }
+      #getRandomHexColor() {
+        // 计算颜色的相对亮度 (基于WCAG标准)
+        function getLuminance(r, g, b) {
+          // 将RGB值标准化到0-1范围
+          const sR = r / 255;
+          const sG = g / 255;
+          const sB = b / 255;
+
+          // 应用gamma修正
+          const R = sR <= 0.03928 ? sR / 12.92 : Math.pow((sR + 0.055) / 1.055, 2.4);
+          const G = sG <= 0.03928 ? sG / 12.92 : Math.pow((sG + 0.055) / 1.055, 2.4);
+          const B = sB <= 0.03928 ? sB / 12.92 : Math.pow((sB + 0.055) / 1.055, 2.4);
+
+          // 计算亮度
+          return 0.2126 * R + 0.7152 * G + 0.0722 * B;
+        }
+
+        // 计算两个颜色之间的对比度
+        function getContrastRatio(l1, l2) {
+          // 确保l1是较亮的颜色
+          if (l1 < l2) {
+            [l1, l2] = [l2, l1];
+          }
+          return (l1 + 0.05) / (l2 + 0.05);
+        }
+
+        // 白色背景的亮度
+        const whiteLuminance = getLuminance(255, 255, 255);
+        let r, g, b, contrastRatio;
+
+        // 生成颜色直到找到对比度足够的颜色
+        do {
+          // 生成随机RGB值
+          r = Math.floor(Math.random() * 256);
+          g = Math.floor(Math.random() * 256);
+          b = Math.floor(Math.random() * 256);
+
+          // 计算生成颜色的亮度
+          const colorLuminance = getLuminance(r, g, b);
+
+          // 计算与白色的对比度
+          contrastRatio = getContrastRatio(whiteLuminance, colorLuminance);
+
+          // 继续循环直到对比度达到WCAG AA标准 (4.5:1)
+        } while (contrastRatio < 4.5);
+
+        // 转换为十六进制格式
+        const toHex = (num) => {
+          const hex = num.toString(16);
+          return hex.length === 1 ? '0' + hex : hex;
+        };
+
+        return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
+      }
+      #getRandomFontSize(min = 12, max = 36) {
+        return getRandomInt(min, max)
+      }
+      #getRandomSpeed(min = 50, max = 200) {
+        // 1s 位移50px
+        // 16.6ms 10/(1000/16.6)
+        const speed = getRandomInt(min, max)
+        return speed / (1000 / 16.6)
+      }
+      #getRandomInitPos() {
+        const x = getRandomInt(0, WALL_WIDTH)
+        const y = getRandomInt(0, WALL_HEIGHT)
+        // 距离弹幕墙左边距的距离
+        return [x, y]
+      }
+      animate() {
+        const danmuEle = this.target
+        const controller = this.#controller
+        let distance = 0
+        const content = this.value
+        const contentLength = content.length * this.size
+        const [x] = this.initPos
+        const randomSpeed = this.speed
+        function animation(controller) {
+          if (controller.signal.aborted) return
+          const timer = requestAnimationFrame(() => {
+            distance += randomSpeed
+            if (distance > x + contentLength) {
+              this.stop()
+              this.target = null
+            }
+
+            danmuEle.style.transform = `translateX(${-distance}px)`
+            animation.call(this, controller)
+          })
+        }
+        // animation如果要使用类原型上的stop方法，需要绑定外部this，因为animation自己是个函数，同时由于递归调用，递归调用也要绑定，因为apply，call是一次性的，或者用bind永久绑定；如果不绑定那就把animation改为箭头函数
+        animation.call(this, controller)
+      }
+      stop() {
+        this.#controller.abort()
+        this.target?.remove()
+      }
+    }
+    const danmuArr = []
+    launchButton.addEventListener('click', () => {
+      const content = input.value
+      const danmu = new DanMu(content)
+      danmu.animate()
+      wall.appendChild(danmu.target)
+      danmuArr.push(danmu)
+    })
+    clearButton.addEventListener('click', () => {
+      danmuArr.forEach((danmu) => {
+        danmu.stop()
+      })
+    })
+
+    function getRandomInt(min = 0, max = 300) {
+      return min + Number(Math.random() * (max - min).toFixed(0))
+    }
+
+
+
+    // 方案二：
+    //   function getRandomInitPos() {
+    //     const x = getRandomInt(0, WALL_WIDTH)
+    //     const y = getRandomInt(0, WALL_HEIGHT)
+    //     // 距离弹幕墙左边距的距离
+    //     return [x, y]
+    //   }
+    //   function getRandomFontSize(min = 12, max = 20) {
+    //     return getRandomInt(min, max)
+    //   }
+    //   function getRandomSpeed(min = 50, max = 200) {
+    //     // 1s 位移50px
+    //     // 16.6ms 10/(1000/16.6)
+    //     const speed = getRandomInt(min, max)
+    //     return speed / (1000 / 16.6)
+    //   }
+    //   const timerPool = new Set()
+    //   function createDanmuEle(content) {
+
+    //     const danmuEle = document.createElement('div')
+    //     const [x, y] = getRandomInitPos()
+    //     danmuEle.classList.add('base')
+    //     danmuEle.style.left = `${x}px`
+    //     danmuEle.style.top = `${y}px`
+    //     danmuEle.textContent = content
+    //     const randomSize = getRandomFontSize()
+    //     danmuEle.style.fontSize = `${randomSize}px`
+    //     const contentLength = content.length * randomSize
+    //     danmuEle.style.color = getRandomHexColor()
+    //     let distance = 0
+    //     const randomSpeed = getRandomSpeed()
+    //     const animationController = new AbortController()
+    //     function animation(controller) {
+    //       if (controller.signal.aborted) return
+    //       const timer = requestAnimationFrame(() => {
+    //         distance += randomSpeed
+    //         if (distance > x + contentLength) {
+    //           controller.abort()
+    //           danmuEle.remove()
+    //         }
+
+    //         danmuEle.style.transform = `translateX(${-distance}px)`
+    //         animation(controller)
+    //       })
+    //     }
+    //     animation(animationController)
+    //     timerPool.add(animationController)
+
+
+    //     return danmuEle
+    //   }
+    //   function launch() {
+    //     const content = getInputContent()
+    //     const danmuEle = createDanmuEle(content)
+    //     wall.appendChild(danmuEle)
+    //   }
+
+    //   function cancelAnimation() {
+    //     timerPool.forEach((controller) => {
+    //       controller.abort()
+    //     })
+    //   }
+    //   launchButton.addEventListener('click', () => {
+    //     launch()
+    //   })
+    //   clearButton.addEventListener('click', () => {
+    //     while (wall.firstChild) {
+    //       wall.removeChild(wall.firstChild);
+    //     }
+    //     cancelAnimation()
+    //   })
+    //   function getInputContent() {
+    //     return input.value
+    //   }
+    //   function getRandomInt(min = 0, max = 300) {
+    //     return min + Number(Math.random() * (max - min).toFixed(0))
+    //   }
+    //   window.addEventListener('keydown', (e) => {
+    //     if (e.key === 'Enter') {
+    //       launch(getInputContent())
+    //     }
+
+    //   })
+
+
+
+
+    //   /**
+    //  * 生成随机十六进制颜色值，确保与白色背景有足够对比度
+    //  * @returns {string} 十六进制颜色值，例如 "#1A2B3C"
+    //  */
+    //   function getRandomHexColor() {
+    //     // 计算颜色的相对亮度 (基于WCAG标准)
+    //     function getLuminance(r, g, b) {
+    //       // 将RGB值标准化到0-1范围
+    //       const sR = r / 255;
+    //       const sG = g / 255;
+    //       const sB = b / 255;
+
+    //       // 应用gamma修正
+    //       const R = sR <= 0.03928 ? sR / 12.92 : Math.pow((sR + 0.055) / 1.055, 2.4);
+    //       const G = sG <= 0.03928 ? sG / 12.92 : Math.pow((sG + 0.055) / 1.055, 2.4);
+    //       const B = sB <= 0.03928 ? sB / 12.92 : Math.pow((sB + 0.055) / 1.055, 2.4);
+
+    //       // 计算亮度
+    //       return 0.2126 * R + 0.7152 * G + 0.0722 * B;
+    //     }
+
+    //     // 计算两个颜色之间的对比度
+    //     function getContrastRatio(l1, l2) {
+    //       // 确保l1是较亮的颜色
+    //       if (l1 < l2) {
+    //         [l1, l2] = [l2, l1];
+    //       }
+    //       return (l1 + 0.05) / (l2 + 0.05);
+    //     }
+
+    //     // 白色背景的亮度
+    //     const whiteLuminance = getLuminance(255, 255, 255);
+    //     let r, g, b, contrastRatio;
+
+    //     // 生成颜色直到找到对比度足够的颜色
+    //     do {
+    //       // 生成随机RGB值
+    //       r = Math.floor(Math.random() * 256);
+    //       g = Math.floor(Math.random() * 256);
+    //       b = Math.floor(Math.random() * 256);
+
+    //       // 计算生成颜色的亮度
+    //       const colorLuminance = getLuminance(r, g, b);
+
+    //       // 计算与白色的对比度
+    //       contrastRatio = getContrastRatio(whiteLuminance, colorLuminance);
+
+    //       // 继续循环直到对比度达到WCAG AA标准 (4.5:1)
+    //     } while (contrastRatio < 4.5);
+
+    //     // 转换为十六进制格式
+    //     const toHex = (num) => {
+    //       const hex = num.toString(16);
+    //       return hex.length === 1 ? '0' + hex : hex;
+    //     };
+
+    //     return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
+    //   }
+
+
+  </script>
+</body>
+
+</html>
